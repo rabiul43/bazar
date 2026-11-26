@@ -1,9 +1,11 @@
-/* বাজারের তালিকা — offline cache. Change VERSION whenever you upload a new index.html. */
-var VERSION = "bazar-v4";
+/* বাজারের তালিকা — offline cache + update handling.
+   To release an update: upload the new files, and change the number below (bazar-v5 -> bazar-v6). */
+var VERSION = "bazar-v5";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png"];
 
 self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));
+  // No skipWaiting here: a new version waits until the person taps "এখনই নিন" in the app.
+  e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(CORE); }));
 });
 
 self.addEventListener("activate", function (e) {
@@ -12,6 +14,12 @@ self.addEventListener("activate", function (e) {
       return Promise.all(keys.filter(function (k) { return k !== VERSION; }).map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
+});
+
+self.addEventListener("message", function (e) {
+  var d = e.data || {};
+  if (d.type === "SKIP_WAITING") self.skipWaiting();
+  else if (d.type === "VERSION" && e.source) e.source.postMessage({ type: "VERSION", v: VERSION });
 });
 
 self.addEventListener("fetch", function (e) {
@@ -34,7 +42,7 @@ self.addEventListener("fetch", function (e) {
 
   if (url.origin !== location.origin) return;
 
-  // Pages: try network first (so updates show up), fall back to the saved copy offline
+  // Pages: network first, fall back to the saved copy offline
   if (req.mode === "navigate") {
     e.respondWith(
       fetch(req).then(function (r) {

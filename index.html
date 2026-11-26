@@ -97,6 +97,11 @@ h3{margin:18px 4px 8px;font-size:15px;color:var(--mute);font-weight:600}
 .pvr .px{border-color:transparent;color:var(--danger);font-size:20px}
 .pvf{display:flex;gap:8px;flex:none;padding-top:4px}
 .pvf .btn{flex:1}.pvf .btn.send{flex:2}
+
+.upd{position:fixed;top:0;left:0;right:0;z-index:8;background:var(--gold);color:var(--ongold);display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 14px 8px;font-weight:800;font-size:17px}
+.upd span{flex:1;min-width:0}.upd button{min-height:44px;padding:0 16px;border-radius:12px;border:0;background:var(--ongold);color:var(--gold);font-weight:800}
+.upd button.x{background:transparent;color:var(--ongold);padding:0 10px;font-size:20px}
+body.hasupd{padding-top:72px}
 </style>
 <meta name="theme-color" content="#1f6b4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -107,6 +112,7 @@ h3{margin:18px 4px 8px;font-size:15px;color:var(--mute);font-weight:600}
 <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
+<div class="upd" id="upd" hidden role="status"><span>নতুন আপডেট এসেছে</span><button id="updGo">এখনই নিন</button><button class="x" id="updX" aria-label="পরে">✕</button></div>
 <div class="w">
 <h1 id="h1">বাজারের তালিকা</h1>
 <div class="tabs"><button id="t1" aria-pressed="true">তালিকা বানান</button><button id="t2" aria-pressed="false">বাজারে</button><button class="settbtn" id="settbtn" aria-label="সেটিং"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
@@ -121,6 +127,11 @@ h3{margin:18px 4px 8px;font-size:15px;color:var(--mute);font-weight:600}
     <div class="sett-divider"></div>
     <p class="sett-section">বাদ দেওয়া হয়েছে</p>
     <div class="sett-grid" id="sett-hidden"></div>
+    <div class="sett-divider"></div>
+    <p class="sett-section">অ্যাপের আপডেট</p>
+    <p class="sett-sub" id="verTxt">ভার্সন —</p>
+    <button class="btn alt" id="updBtn" style="width:100%">আপডেট খুঁজুন</button>
+    <p class="sett-sub" id="updMsg" aria-live="polite" style="min-height:1.4em"></p>
     <button class="btn" id="settClose" style="width:100%;margin-top:20px">সম্পন্ন</button>
   </div>
 </div>
@@ -421,8 +432,39 @@ tab(S.tab||1);
 loadFromHash();
 </script>
 <script>
-/* offline support: cache the app so it opens with no internet */
-if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+/* offline support + app updates */
+var swReg=null,reloading=false,lastCheck=0;
+function setUpd(t){var e=$("updMsg");if(e)e.textContent=t}
+function showUpd(){$("upd").hidden=false;document.body.classList.add("hasupd");setUpd("নতুন ভার্সন পাওয়া গেছে — ওপরের হলুদ বারে \"এখনই নিন\" চাপুন")}
+function askVersion(){var w=navigator.serviceWorker.controller||(swReg&&swReg.active);if(w)w.postMessage({type:"VERSION"})}
+function checkUpdate(manual){
+  if(!swReg){if(manual)setUpd("এই ব্রাউজারে আপডেট সুবিধা নেই");return}
+  if(!navigator.onLine){if(manual)setUpd("নেট নেই — নেট এলে আবার চেষ্টা করুন");return}
+  if(manual)setUpd("খোঁজা হচ্ছে…");
+  lastCheck=Date.now();
+  swReg.update().then(function(){
+    if(swReg.waiting)showUpd();
+    else if(swReg.installing){if(manual)setUpd("নতুন ভার্সন নামছে…")}
+    else if(manual)setUpd("আপনি সর্বশেষ ভার্সনেই আছেন ✓")
+  }).catch(function(){if(manual)setUpd("খোঁজা যায়নি, একটু পরে চেষ্টা করুন")})}
+if("serviceWorker"in navigator){
+  navigator.serviceWorker.addEventListener("message",function(e){var d=e.data||{};if(d.type==="VERSION"){var n=String(d.v).replace(/\D/g,"");$("verTxt").textContent="ভার্সন "+(n?bn(n):"—")}});
+  navigator.serviceWorker.addEventListener("controllerchange",function(){if(reloading)location.reload()});
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      swReg=reg;
+      if(reg.waiting&&navigator.serviceWorker.controller)showUpd();
+      reg.addEventListener("updatefound",function(){var w=reg.installing;if(!w)return;
+        w.addEventListener("statechange",function(){if(w.state==="installed"&&navigator.serviceWorker.controller)showUpd()})});
+      navigator.serviceWorker.ready.then(askVersion);
+      checkUpdate(false)
+    }).catch(function(){})});
+  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&Date.now()-lastCheck>300000)checkUpdate(false)});
+  $("updGo").onclick=function(){reloading=true;if(swReg&&swReg.waiting)swReg.waiting.postMessage({type:"SKIP_WAITING"});else location.reload()};
+  $("updX").onclick=function(){$("upd").hidden=true;document.body.classList.remove("hasupd")};
+  $("updBtn").onclick=function(){checkUpdate(true)};
+  $("settbtn").addEventListener("click",askVersion)
+}else{var vb=$("updBtn");if(vb)vb.onclick=function(){setUpd("এই ব্রাউজারে আপডেট সুবিধা নেই")}}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 </script>
 </body>
