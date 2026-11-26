@@ -68,18 +68,31 @@ h3{margin:18px 4px 8px;font-size:14px;color:var(--mute);font-weight:600}
 [hidden]{display:none!important}
 /* settings */
 .sett-overlay{position:fixed;inset:0;background:rgba(18,56,42,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
-.sett-sheet{width:100%;max-width:480px;background:#fff;border-radius:30px 30px 0 0;padding:16px 20px calc(32px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow-y:auto;animation:up .22s ease-out}
-.sett-hd{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 16px}
-.sett-title{font-family:"Anek Bangla",sans-serif;font-size:22px;font-weight:800;margin:0 0 4px}
-.sett-sub{font-size:14px;color:var(--mute);margin:0 0 18px}
-.sett-section{font-size:13px;font-weight:700;color:var(--mute);letter-spacing:.06em;margin:18px 0 10px;padding:0 2px}
-.sett-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px;margin-bottom:4px}
-.sett-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;background:var(--sf);border-radius:18px;border:2px solid var(--line);text-align:center;user-select:none}
-.sett-item.active{background:var(--sel);border-color:var(--brand)}
-.sett-item i{width:46px;height:46px;border-radius:50%;background:var(--c,#FDEBBB);display:grid;place-items:center;font-size:24px;line-height:1;color:#12382A;font-style:normal}
-.sett-item span{font-size:12px;font-weight:700;line-height:1.2;word-break:break-all}
-.sett-badge{position:absolute;top:-8px;right:-6px;width:28px;height:28px;border-radius:50%;border:0;display:grid;place-items:center;font-size:18px;font-weight:800;z-index:1}
-.sett-badge.rem{background:#D93025;color:#fff}.sett-badge.add{background:#2E7D32;color:#fff}
+.sett-sheet{width:100%;max-width:480px;background:#fff;border-radius:30px 30px 0 0;padding:16px 20px calc(18px + env(safe-area-inset-bottom,0px));height:90vh;height:90dvh;display:flex;flex-direction:column;animation:up .22s ease-out}
+.sett-hd{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px;flex:none}
+.sett-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex:none}
+.sett-title{font-family:"Anek Bangla",sans-serif;font-size:22px;font-weight:800;margin:0 0 2px}
+.sett-sub{font-size:14px;color:var(--mute);margin:0 0 10px}
+.sett-sub.cnt{font-weight:700;color:var(--brand);margin:0}
+.mg-undo{height:44px!important;padding:0 14px!important;font-size:15px;flex:none;border-radius:14px!important}
+.mg-undo:disabled{opacity:.35}
+.sett-sheet .ch{margin:0 -20px;padding:0 20px;flex:none}
+.sett-sheet .c{height:40px;font-size:15px;padding:0 14px}
+.sett-sheet .c.off{border-color:#D93025;color:#D93025}
+.sett-sheet .c.off[aria-pressed=true]{background:#D93025;color:#fff}
+.mg-bulk{display:flex;gap:8px;margin:10px 0;flex:none}
+.mg-bulk .btn{flex:1;height:46px;font-size:15px;border-radius:14px;padding:0 8px}
+.sett-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 4px 4px;margin:0 -4px}
+.sett-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 8px;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.sett-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 2px 8px;min-height:92px;background:var(--sel);border-radius:18px;border:2px solid var(--brand);text-align:center;font:inherit;color:var(--ink);-webkit-tap-highlight-color:transparent}
+.sett-item i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;line-height:1;color:#12382A;font-style:normal;pointer-events:none}
+.sett-item i svg{width:68%;height:68%}
+.sett-item .nm{font-size:12px;font-weight:700;line-height:1.2;word-break:break-word;pointer-events:none}
+.sett-item .x{position:absolute;top:-7px;right:-6px;width:26px;height:26px;border-radius:50%;background:#D93025;color:#fff;display:none;place-items:center;font-size:15px;font-weight:800;pointer-events:none}
+.sett-item.off{background:#fff;border:2px dashed #C9D3CB}
+.sett-item.off i,.sett-item.off .nm{opacity:.35;filter:grayscale(1)}
+.sett-item.off .nm{text-decoration:line-through}
+.sett-item.off .x{display:grid}
 .sett-divider{height:1px;background:var(--line);margin:16px -4px}
 /* preview */
 #pvd{z-index:4}.pvs{max-height:90vh;gap:10px}
@@ -119,19 +132,22 @@ body.hasupd{padding-top:72px}
 <div class="sett-overlay" id="settPanel" hidden>
   <div class="sett-sheet" role="dialog" aria-modal="true" aria-label="পণ্য সেটিং">
     <div class="sett-hd"></div>
-    <p class="sett-title">পণ্য ম্যানেজার</p>
-    <p class="sett-sub">− চাপলে সরাবে · + চাপলে ফিরিয়ে আনবে</p>
-    <p class="sett-section">চালু আছে</p>
-    <div class="sett-grid" id="sett-active"></div>
-    <div class="sett-divider"></div>
-    <p class="sett-section">বাদ দেওয়া হয়েছে</p>
-    <div class="sett-grid" id="sett-hidden"></div>
-    <div class="sett-divider"></div>
-    <p class="sett-section">অ্যাপের আপডেট</p>
-    <p class="sett-sub" id="verTxt">ভার্সন —</p>
-    <button class="btn alt" id="updBtn" style="width:100%">আপডেট খুঁজুন</button>
-    <p class="sett-sub" id="updMsg" aria-live="polite" style="min-height:1.4em"></p>
-    <button class="btn" id="settClose" style="width:100%;margin-top:20px">সম্পন্ন</button>
+    <div class="sett-top">
+      <div><p class="sett-title">পণ্য ম্যানেজার</p><p class="sett-sub cnt" id="mgCount" aria-live="polite"></p></div>
+      <button class="btn alt mg-undo" id="mgUndo" disabled>↶ ফিরিয়ে নিন</button>
+    </div>
+    <p class="sett-sub" style="margin-top:8px">যেটা লাগে না তাতে ট্যাপ করুন, অথবা আঙুল ডানে-বামে টেনে (স্লাইড করে) একসাথে অনেকগুলো বাদ দিন। আবার ট্যাপ বা স্লাইড করলে ফিরে আসবে।</p>
+    <div class="ch" id="mgChips"></div>
+    <div class="mg-bulk"><button class="btn alt" id="mgAllOff">এই বিভাগ সব বাদ</button><button class="btn alt" id="mgAllOn">সব ফিরিয়ে আনুন</button></div>
+    <div class="sett-scroll" id="mgScroll">
+      <div class="sett-grid" id="mgGrid"></div>
+      <div class="sett-divider"></div>
+      <p class="sett-title" style="font-size:17px">অ্যাপের আপডেট</p>
+      <p class="sett-sub" id="verTxt">ভার্সন —</p>
+      <button class="btn alt" id="updBtn" style="width:100%">আপডেট খুঁজুন</button>
+      <p class="sett-sub" id="updMsg" aria-live="polite" style="min-height:1.4em;margin-top:8px"></p>
+    </div>
+    <button class="btn" id="settClose" style="width:100%;margin-top:12px;flex:none">সম্পন্ন</button>
   </div>
 </div>
 
@@ -389,54 +405,73 @@ $("tot").onclick=function(e){if(e.target.id==="fin"){var t=total();var dn=S.shop
 function tab(n){S.tab=n;$("t1").setAttribute("aria-pressed",n===1);$("t2").setAttribute("aria-pressed",n===2);$("v1").hidden=n!==1;$("v2").hidden=n!==2;$("bar1").hidden=n!==1;$("tot").hidden=n!==2||!S.shop.length;document.body.classList.toggle("shop",n===2);$("h1").textContent=n===1?"বাজারের তালিকা":"বাজারে আছি";if(n===2)drawShop();else draw();window.scrollTo(0,0)}
 $("t1").onclick=function(){tab(1)};$("t2").onclick=function(){tab(2)};
 
-/* ===== SETTINGS / PRODUCT MANAGER ===== */
-// S.hidden = object of hidden item ids e.g. {"i0":true,"i5":true}
-S.hidden=S.hidden||{};
+/* ===== PRODUCT MANAGER =====
+   Removed items are remembered BY NAME (S.hid = {"পেঁয়াজ":1,...}), never by position.
+   So when an update adds, moves or renames-around items, every item the person
+   removed before stays removed and nothing else gets hidden by mistake. */
+S.hid=S.hid||{};
+/* one-time migration from the older version, which stored positions like {"i5":true} */
+if(S.hidden){Object.keys(S.hidden).forEach(function(id){if(S.hidden[id]&&/^i\d+$/.test(id)){var b=BASE[+id.slice(1)];if(b)S.hid[b[1]]=1}});delete S.hidden;save()}
 
-function isHidden(id){return !!S.hidden[id]}
-
-// Override all() to filter hidden items
 var _origAll=all;
-all=function(){return _origAll().filter(function(it){return !S.hidden[it.id]})};
+all=function(){return _origAll().filter(function(it){return !S.hid[it.n]})};
 
-function drawSett(){
-  var items=_origAll();
-  var active=items.filter(function(it){return !S.hidden[it.id]});
-  var hidden=items.filter(function(it){return S.hidden[it.id]});
+var mg={cat:"সব",undo:null},OFF="__off";
+function mgItems(){return _origAll().filter(function(it){
+  if(mg.cat===OFF)return !!S.hid[it.n];
+  if(mg.cat==="সব")return true;
+  if(it.g<0)return mg.cat==="নিজের";
+  return CATS[it.g][0]===mg.cat})}
+function mgCard(it){var tint=TINT[it.c%TINT.length],off=!!S.hid[it.n];
+  return'<button type="button" class="sett-item'+(off?" off":"")+'" data-n="'+esc(it.n)+'" style="--c:'+tint+'" aria-pressed="'+off+'" aria-label="'+esc(it.n)+(off?" — বাদ দেওয়া":"")+'"><span class="x">✕</span><i style="background:'+tint+'">'+ico(it)+'</i><span class="nm">'+esc(it.n)+'</span></button>'}
+function mgCounts(){var a=_origAll(),off=a.filter(function(it){return S.hid[it.n]}).length;
+  $("mgCount").textContent=bn(a.length-off)+"টি চালু · "+bn(off)+"টি বাদ";
+  $("mgUndo").disabled=!mg.undo;
+  var c=$("mgChips").querySelector("[data-mc='"+OFF+"']");if(c)c.textContent="বাদ দেওয়া · "+bn(off)}
+function mgDraw(){
+  var offN=_origAll().filter(function(it){return S.hid[it.n]}).length;
+  var tabs=["সব"].concat(CATS.map(function(c){return c[0]}),S.custom.length?["নিজের"]:[]);
+  $("mgChips").innerHTML=tabs.map(function(k){return'<button class="c" data-mc="'+esc(k)+'" aria-pressed="'+(mg.cat===k)+'">'+esc(k)+'</button>'}).join("")+'<button class="c off" data-mc="'+OFF+'" aria-pressed="'+(mg.cat===OFF)+'">বাদ দেওয়া · '+bn(offN)+'</button>';
+  var list=mgItems();
+  $("mgGrid").innerHTML=list.length?list.map(mgCard).join(""):'<p class="sett-sub" style="grid-column:1/-1;text-align:center;padding:20px 0">কিছু বাদ দেওয়া নেই</p>';
+  $("mgAllOff").hidden=mg.cat===OFF;
+  $("mgAllOff").textContent=mg.cat==="সব"?"সবগুলো বাদ দিন":"এই বিভাগ সব বাদ";
+  $("mgAllOn").textContent=mg.cat==="সব"||mg.cat===OFF?"সব ফিরিয়ে আনুন":"এই বিভাগ সব ফেরান";
+  mgCounts()}
+function mgCommit(snap){if(JSON.stringify(S.hid)===snap)return;mg.undo=snap;save();mgCounts()}
+function mgPaint(t,off){if(!t)return;var n=t.dataset.n;if(!!S.hid[n]===off)return;
+  if(off)S.hid[n]=1;else delete S.hid[n];
+  t.classList.toggle("off",off);t.setAttribute("aria-pressed",off)}
 
-  function card(it,mode){
-    var tint=TINT[it.c%TINT.length];
-    var iconHtml=IM[it.n]?'<svg viewBox="0 0 48 48" width="28" height="28">'+IM[it.n]+'</svg>':emo(it);
-    return'<div class="sett-item'+(mode==="active"?" active":"")+'" style="--c:'+tint+'">'
-      +'<button class="sett-badge '+(mode==="active"?"rem":"add")+'" data-'+(mode==="active"?"hide":"show")+'="'+it.id+'" aria-label="'+(mode==="active"?"সরাও":"যোগ করো")+'">'+( mode==="active"?"−":"+")+'</button>'
-      +'<i style="background:'+tint+'">'+iconHtml+'</i>'
-      +'<span>'+esc(it.n)+'</span>'
-      +'</div>';
-  }
+/* tap = toggle one · slide the finger across tiles = toggle many (same action as the first tile) */
+var mgP=null,mgG=$("mgGrid");
+function tileAt(x,y){var el=document.elementFromPoint(x,y);return el&&el.closest?el.closest(".sett-item"):null}
+mgG.addEventListener("pointerdown",function(e){if(e.pointerType==="mouse"&&e.button!==0)return;var t=e.target.closest(".sett-item");if(!t)return;
+  mgP={id:e.pointerId,x:e.clientX,t:t,off:!S.hid[t.dataset.n],moved:false,snap:JSON.stringify(S.hid)}});
+mgG.addEventListener("pointermove",function(e){if(!mgP||e.pointerId!==mgP.id)return;
+  if(!mgP.moved){if(Math.abs(e.clientX-mgP.x)<8)return;mgP.moved=true;mgPaint(mgP.t,mgP.off)}
+  mgPaint(tileAt(e.clientX,e.clientY),mgP.off)});
+function mgEnd(e,cancelled){if(!mgP||e.pointerId!==mgP.id)return;var p=mgP;mgP=null;
+  if(cancelled&&!p.moved)return;               /* the browser took over to scroll up/down: change nothing */
+  if(!p.moved)mgPaint(p.t,p.off);              /* plain tap */
+  mgCommit(p.snap);
+  if(mg.cat===OFF)mgDraw()}
+mgG.addEventListener("pointerup",function(e){mgEnd(e,false)});
+mgG.addEventListener("pointercancel",function(e){mgEnd(e,true)});
+mgG.addEventListener("click",function(e){if(e.detail!==0)return;            /* keyboard Enter/Space only */
+  var t=e.target.closest(".sett-item");if(!t)return;var snap=JSON.stringify(S.hid);mgPaint(t,!S.hid[t.dataset.n]);mgCommit(snap);if(mg.cat===OFF)mgDraw()});
 
-  $("sett-active").innerHTML=active.length
-    ?active.map(function(it){return card(it,"active")}).join("")
-    :'<p style="grid-column:1/-1;color:var(--mute);font-size:14px">সব বাদ দেওয়া হয়েছে</p>';
+$("mgChips").onclick=function(e){var b=e.target.closest("[data-mc]");if(!b)return;mg.cat=b.dataset.mc;mgDraw();$("mgScroll").scrollTop=0};
+$("mgAllOff").onclick=function(){var snap=JSON.stringify(S.hid);mgItems().forEach(function(it){S.hid[it.n]=1});mgCommit(snap);mgDraw()};
+$("mgAllOn").onclick=function(){var snap=JSON.stringify(S.hid);mgItems().forEach(function(it){delete S.hid[it.n]});mgCommit(snap);mgDraw()};
+$("mgUndo").onclick=function(){if(!mg.undo)return;S.hid=JSON.parse(mg.undo);mg.undo=null;save();mgDraw()};
 
-  $("sett-hidden").innerHTML=hidden.length
-    ?hidden.map(function(it){return card(it,"hidden")}).join("")
-    :'<p style="grid-column:1/-1;color:var(--mute);font-size:14px">কোনো পণ্য বাদ দেওয়া হয়নি</p>';
-}
-
-function openSett(){drawSett();$("settPanel").hidden=false;document.body.style.overflow="hidden"}
+function openSett(){mg.undo=null;mgDraw();$("settPanel").hidden=false;document.body.style.overflow="hidden";$("mgScroll").scrollTop=0}
 function closeSett(){$("settPanel").hidden=true;document.body.style.overflow="";draw()}
-
 $("settbtn").onclick=openSett;
 $("settClose").onclick=closeSett;
 $("settPanel").onclick=function(e){if(e.target===this)closeSett()};
-
-$("settPanel").onclick=function(e){
-  if(e.target===this){closeSett();return}
-  var hb=e.target.closest("[data-hide]");
-  if(hb){var id=hb.dataset.hide;S.hidden[id]=true;save();drawSett();return}
-  var sb=e.target.closest("[data-show]");
-  if(sb){var id2=sb.dataset.show;delete S.hidden[id2];save();drawSett();return}
-};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("settPanel").hidden&&!sh)closeSett()});
 
 try{$("dt").textContent=new Date().toLocaleDateString("bn-BD",{weekday:"long",day:"numeric",month:"long"})}catch(e){}
 tab(S.tab||1);
