@@ -1,5 +1,5 @@
 /* বাজারের তালিকা — offline cache. Change VERSION whenever you upload a new index.html. */
-var VERSION = "bazar-v1";
+var VERSION = "bazar-v4";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png"];
 
 self.addEventListener("install", function (e) {

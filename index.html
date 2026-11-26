@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" translate="no" class="notranslate">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>বাজারের তালিকা</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;800&display=swap" rel="stylesheet">
@@ -80,6 +80,23 @@ h3{margin:18px 4px 8px;font-size:15px;color:var(--mute);font-weight:600}
 .sett-badge.rem{background:#e53935;color:#fff}
 .sett-badge.add{background:#43a047;color:#fff}
 .sett-divider{height:1px;background:var(--line);margin:16px -4px}
+
+#pvd{z-index:4}
+.pvs{max-height:90vh;gap:10px}
+.pvs .hd{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 2px;flex:none}
+.pvt{margin:0;font-size:22px;font-weight:800}.pvsub{margin:0;color:var(--mute);font-size:15px}
+.pvl{overflow-y:auto;flex:1;min-height:0;margin:0 -8px;padding:0 8px;overscroll-behavior:contain}
+.pvg{margin:12px 2px 6px;font-size:14px;font-weight:600;color:var(--mute)}
+.pvr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pvr .pi{width:40px;height:40px;border-radius:50%;background:var(--sel);display:grid;place-items:center;font-size:22px;line-height:1;flex:none;font-style:normal}
+.pvr .pi svg{width:30px;height:30px}
+.pvr .pn{flex:1;min-width:0;text-align:left;background:none;border:0;padding:4px 2px;min-height:48px;display:flex;flex-direction:column;justify-content:center;line-height:1.25}
+.pvr .pn b{font-size:18px}.pvr .pn small{color:var(--mute);font-size:15px}
+.pvr .st{display:flex;gap:6px;flex:none}
+.pvr .st button,.pvr .px{width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:var(--card);font-size:22px;font-weight:800;display:grid;place-items:center;padding:0;flex:none}
+.pvr .px{border-color:transparent;color:var(--danger);font-size:20px}
+.pvf{display:flex;gap:8px;flex:none;padding-top:4px}
+.pvf .btn{flex:1}.pvf .btn.send{flex:2}
 </style>
 <meta name="theme-color" content="#1f6b4a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -130,6 +147,7 @@ h3{margin:18px 4px 8px;font-size:15px;color:var(--mute);font-weight:600}
 
 <div class="bar" id="bar1"><div><button class="go" id="gob">বাজারে যান · <span id="cnt">০</span>টি<span id="est" style="display:block;font-size:13px;font-weight:600;line-height:1.1"></span></button><button class="sq wa" id="share" aria-label="WhatsApp-এ পাঠান"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button><button class="sq cl" id="clr" aria-label="সব মুছুন"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button></div></div>
 <div id="tot" class="tot" hidden></div>
+<div class="dim" id="pvd" hidden><div class="sh pvs" id="pv" role="dialog" aria-modal="true" aria-label="পাঠানোর আগে তালিকা দেখুন"></div></div>
 <div class="dim" id="dim" hidden><div class="sh" id="sh" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -204,7 +222,7 @@ $("lastb").onclick=function(e){if(!e.target.closest("[data-last]"))return;var n=
 function openSh(id){sh=id;drawSh();$("dim").hidden=false}
 function drawSh(){var it=find(sh);$("sh").style.setProperty("--c",TINT[it.c%TINT.length]);
   $("sh").innerHTML='<div class="hd"></div><div class="top"><i>'+ico(it)+'</i><div><b>'+esc(it.n)+'</b><small>কতটুকু লাগবে?</small></div></div><div class="big"><button class="mm" data-a="dec" aria-label="কমান">−</button><div>'+qtxt(S.q[sh])+'<small>'+U(it)+'</small></div><button data-a="inc" aria-label="বাড়ান">+</button></div><div class="lb">দ্রুত বাছুন</div><div class="rw">'+[.5,1,2,5,10].map(function(p){return'<button class="c" data-p="'+p+'" aria-pressed="'+(S.q[sh]===p)+'">'+qtxt(p)+'</button>'}).join("")+'</div><div class="lb">একক</div><div class="rw">'+UNITS.map(function(u){return'<button class="c" data-u="'+u+'" aria-pressed="'+(U(it)===u)+'">'+u+'</button>'}).join("")+'</div><button class="go" data-a="ok">ঠিক আছে</button><button class="rm" data-a="rm">তালিকা থেকে বাদ দিন</button>'}
-function closeSh(){$("dim").hidden=true;sh=null;draw()}
+function closeSh(){$("dim").hidden=true;sh=null;draw();if(!$("pvd").hidden)drawPv()}
 $("sh").onclick=function(e){var b=e.target.closest("button");if(!b)return;var it=find(sh),a=b.dataset.a;
   if(a==="inc")S.q[sh]+=step(it);else if(a==="dec"){if(S.q[sh]-step(it)>0)S.q[sh]-=step(it)}
   else if(a==="ok")return closeSh();else if(a==="rm"){delete S.q[sh];return closeSh()}
@@ -217,7 +235,7 @@ function lines(){return picked().map(function(it){return"☐ "+it.n+" — "+qtxt
 function pageHtml(){
   var items=picked().sort(function(a,b){return(a.g<0?99:a.g)-(b.g<0?99:b.g)}).map(function(it){return{n:it.n,q:qtxt(S.q[it.id]),u:U(it),g:it.g<0?"নিজের":CATS[it.g][0],e:emo(it),s:IM[it.n]||""}});
   var D={k:Date.now().toString(36),i:items};
-  return `<!DOCTYPE html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>বাজারের তালিকা</title>
+  return `<!DOCTYPE html><html lang="bn" translate="no" class="notranslate"><head><meta charset="utf-8"><meta name="google" content="notranslate"><meta name="viewport" content="width=device-width,initial-scale=1"><title>বাজারের তালিকা</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f7f1;--card:#fff;--ink:#1d2a22;--mute:#4d6455;--line:#dbe4d6;--brand:#1f6b4a;--on:#fff;--gold:#f2b705;--og:#2a2100}
@@ -264,10 +282,68 @@ E("L").oninput=function(e){var i=e.target.dataset.p;if(i!==undefined){s.p[i]=e.t
 E("rs").onclick=function(){if(confirm("সব টিক ও দাম মুছবেন?")){s={d:{},p:{}};sv();draw()}};
 draw();
 <\/script></body></html>`}
-$("share").onclick=function(){if(!picked().length)return toast("আগে জিনিস বাছুন");var t="🛒 বাজারের তালিকা\n"+lines().join("\n");
-  try{var f=new File([pageHtml()],"bazar-list.html",{type:"text/html"});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"বাজারের তালিকা",text:t}).catch(function(){});return}}catch(e){}
+/* send as a link: the list travels inside the link, no file needed */
+function catSig(){var x=0;BASE.forEach(function(b){for(var i=0;i<b[1].length;i++)x=(x*31+b[1].charCodeAt(i))|0});return(x>>>0).toString(36)}
+function encRef(s){return encodeURIComponent(s).replace(/[-_.]/g,function(c){return"%"+c.charCodeAt(0).toString(16).toUpperCase()})}
+function listLink(){
+  if(location.protocol==="file:")return"";
+  var parts=picked().map(function(it){
+    var base=/^i\d+$/.test(it.id),ref=base?it.id.slice(1):"n"+encRef(it.n),u=U(it),ui=UNITS.indexOf(u);
+    var uf=(base&&u===it.u)?"":(ui>=0?String(ui):"x"+encRef(u));
+    return ref+"-"+(Math.round(S.q[it.id]*100)/100)+"-"+uf});
+  return location.origin+location.pathname+"#l="+catSig()+"_"+parts.join("_")}
+function doShare(){
+  var link=listLink(),t="🛒 বাজারের তালিকা · "+bn(picked().length)+"টি\n"+lines().join("\n")+(link?"\n\n👉 অ্যাপে খুলুন:\n"+link:"");
   try{var w=window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank");if(w)return}catch(e){}
-  try{navigator.clipboard.writeText(t).then(function(){toast("তালিকা কপি হয়েছে, WhatsApp-এ পেস্ট করুন")})}catch(e){toast("পাঠানো যায়নি")}};
+  try{if(navigator.share){navigator.share({title:"বাজারের তালিকা",text:t}).catch(function(){});return}}catch(e){}
+  try{navigator.clipboard.writeText(t).then(function(){toast("তালিকা কপি হয়েছে, WhatsApp-এ পেস্ট করুন")})}catch(e){toast("পাঠানো যায়নি")}}
+/* open a list that arrived as a link */
+function loadFromHash(){
+  var m=location.hash.match(/^#l=(.+)$/);if(!m)return;
+  var parts=m[1].split("_"),sig=parts.shift(),out=[];
+  function clean(){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+  if(sig!==catSig()){clean();return toast("লিংকের তালিকা অ্যাপের অন্য ভার্সনের — পাঠানো লেখা থেকে নিন")}
+  try{
+    parts.forEach(function(p){var f=p.split("-"),ref=f[0],q=parseFloat(f[1]),uf=f[2]||"",it,n,u;
+      if(!(q>0))return;
+      if(/^\d+$/.test(ref)){it=find("i"+ref);if(!it)throw 0;n=it.n;u=it.u}
+      else{n=decodeURIComponent(ref.slice(1));it=all().filter(function(a){return a.n===n})[0];u=it?it.u:"পিস"}
+      if(uf){u=uf.charAt(0)==="x"?decodeURIComponent(uf.slice(1)):(UNITS[+uf]||u)}
+      out.push({id:it?it.id:undefined,n:n,q:q,u:u,done:false,p:""})})
+  }catch(e){clean();return toast("লিংক থেকে তালিকা খোলা যায়নি")}
+  if(!out.length){clean();return}
+  if(S.shop.some(function(x){return x.done||x.p})&&!confirm("আপনার বর্তমান বাজারের টিক ও দাম মুছে এই নতুন তালিকা খুলবেন?")){clean();return}
+  S.shop=out;save();clean();tab(2);toast(bn(out.length)+"টি জিনিসের তালিকা খোলা হয়েছে")}
+window.addEventListener("hashchange",loadFromHash);
+/* preview before sending */
+function catOf(it){return it.g<0?"নিজের":CATS[it.g][0]}
+function openPv(){if(!picked().length)return toast("আগে জিনিস বাছুন");drawPv();$("pvd").hidden=false;document.body.style.overflow="hidden"}
+function closePv(){$("pvd").hidden=true;document.body.style.overflow=""}
+function drawPv(){
+  var items=picked().sort(function(a,b){return(a.g<0?99:a.g)-(b.g<0?99:b.g)});
+  if(!items.length){closePv();return toast("তালিকা খালি হয়ে গেছে")}
+  var h='<div class="hd"></div><p class="pvt">পাঠানোর আগে দেখে নিন</p><p class="pvsub">মোট '+bn(items.length)+'টি জিনিস · ভুল থাকলে এখানেই ঠিক করুন · লিংকসহ WhatsApp-এ যাবে</p><div class="pvl">',g="";
+  items.forEach(function(it){
+    var c=catOf(it);if(c!==g){g=c;h+='<p class="pvg">'+esc(c)+'</p>'}
+    h+='<div class="pvr"><i class="pi">'+ico(it)+'</i><button class="pn" data-edit="'+it.id+'" aria-label="'+esc(it.n)+' পরিমাণ বা একক বদলান"><b>'+esc(it.n)+'</b><small>'+qtxt(S.q[it.id])+' '+esc(U(it))+' · বদলান</small></button>'
+     +'<div class="st"><button data-pd="'+it.id+'" aria-label="'+esc(it.n)+' কমান">−</button><button data-pi="'+it.id+'" aria-label="'+esc(it.n)+' বাড়ান">+</button></div>'
+     +'<button class="px" data-px="'+it.id+'" aria-label="'+esc(it.n)+' বাদ দিন">✕</button></div>'
+  });
+  h+='</div><div class="pvf"><button class="btn alt" data-back="1">+ আরও জিনিস</button><button class="btn send" data-send="1">পাঠান · '+bn(items.length)+'টি</button></div>';
+  var l=$("pv").querySelector(".pvl"),y=l?l.scrollTop:0;
+  $("pv").innerHTML=h;var l2=$("pv").querySelector(".pvl");if(l2)l2.scrollTop=y}
+$("pv").onclick=function(e){var b=e.target.closest("button");if(!b)return;var d=b.dataset,id,it;
+  if(d.send){closePv();doShare();return}
+  if(d.back){closePv();return}
+  if(d.edit){openSh(d.edit);return}
+  id=d.pi||d.pd||d.px;if(!id)return;it=find(id);
+  if(d.pi)S.q[id]+=step(it);
+  else if(d.pd){if(S.q[id]-step(it)>0)S.q[id]-=step(it)}
+  else if(d.px)delete S.q[id];
+  save();draw();drawPv()};
+$("pvd").onclick=function(e){if(e.target===this)closePv()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!sh&&!$("pvd").hidden)closePv()});
+$("share").onclick=openPv;
 $("clr").onclick=function(){if(!picked().length)return;if(confirm("পুরো তালিকা মুছবেন?")){S.q={};S.u={};draw()}};
 function parse(t){var o=[];t.split(/\n/).forEach(function(l){var m=l.match(/^[\s•☐☑✅\-*]*(.+?)\s*[—–-]\s*([০-৯\d.½]+)\s*(.*)$/);if(m){var qs=m[2],q=/½/.test(qs)?(num(qs.replace("½",""))||0)+.5:num(qs);o.push({n:m[1].trim(),q:q||1,u:m[3].trim()||"পিস",done:false,p:""})}});return o}
 $("load").onclick=function(){var l=parse($("paste").value);if(!l.length)return toast("তালিকা বোঝা যায়নি");S.shop=l;imp=false;$("paste").value="";drawShop()};
@@ -342,6 +418,7 @@ $("settPanel").onclick=function(e){
 };
 
 tab(S.tab||1);
+loadFromHash();
 </script>
 <script>
 /* offline support: cache the app so it opens with no internet */
