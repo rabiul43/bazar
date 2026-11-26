@@ -94,6 +94,22 @@ h3{margin:18px 4px 8px;font-size:14px;color:var(--mute);font-weight:600}
 .sett-item.off .nm{text-decoration:line-through}
 .sett-item.off .x{display:grid}
 .sett-divider{height:1px;background:var(--line);margin:16px -4px}
+.td-open{width:100%;margin-top:12px;height:54px;border-radius:16px;border:2px solid var(--brand);background:var(--sel);color:var(--brand);font-weight:800;font-size:17px}
+.td-sh{max-height:92vh;max-height:92dvh;overflow-y:auto;overscroll-behavior:contain}
+.td-title{font-family:"Anek Bangla",sans-serif;font-size:22px;font-weight:800;display:block}
+.td-sub{margin:4px 0 0;font-size:14px;color:var(--mute)}
+#tdIn{min-height:96px;font-size:18px;resize:vertical}
+.td-r{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--sf);border:2px solid var(--line);border-radius:18px;margin-bottom:8px}
+.td-r>i{width:42px;height:42px;border-radius:50%;background:var(--c,#FDEBBB);display:grid;place-items:center;font-style:normal;font-size:23px;flex:none}
+.td-r>i svg{width:68%;height:68%}
+.td-r .n{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}.td-r .n b{font-size:18px}.td-r .n small{color:var(--mute);font-size:13px}
+.td-r.amb{border-color:var(--gold);background:#FFF8E1}.td-r.new{border-style:dashed}
+.td-x{width:40px;height:40px;border-radius:50%;border:0;background:#fff;color:var(--mute);font-size:18px;flex:none;border:2px solid var(--line)}
+.td-ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.td-ch .c{height:38px;padding:0 14px;font-size:15px}
+.td-keep{height:38px;padding:0 12px;border-radius:19px;border:2px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;font-size:13px;flex:none}
+.td-keep[aria-pressed=true]{background:var(--brand);color:var(--on)}
+.td-note{color:var(--mute);font-size:14px;text-align:center;padding:6px 0}
 /* preview */
 #pvd{z-index:4}.pvs{max-height:90vh;gap:10px}
 .pvs .hd{margin:0 auto 2px;flex:none}
@@ -153,6 +169,7 @@ body.hasupd{padding-top:72px}
 
 <section id="v1">
   <label class="sr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" placeholder="জিনিস খুঁজুন বা নতুন লিখুন" autocomplete="off"></label>
+  <button class="td-open" id="tdOpen" type="button"><span aria-hidden="true">✍️</span> আজকের জন্য আলাদা জিনিস লিখুন</button>
   <div id="addc"></div>
   <div id="lastb"></div>
   <div class="ch" id="chips"></div>
@@ -175,6 +192,14 @@ body.hasupd{padding-top:72px}
 <div id="tot" class="tot" hidden></div>
 <div class="dim" id="pvd" hidden><div class="sh pvs" id="pv" role="dialog" aria-modal="true" aria-label="পাঠানোর আগে তালিকা দেখুন"></div></div>
 <div class="dim" id="dim" hidden><div class="sh" id="sh" role="dialog" aria-modal="true"></div></div>
+<div class="dim" id="tdD" hidden><div class="sh td-sh" id="tdS" role="dialog" aria-modal="true" aria-label="আজকের জন্য আলাদা জিনিস">
+  <div class="hd"></div>
+  <div><b class="td-title">আজকের জন্য আলাদা জিনিস</b><p class="td-sub">যা মনে আসে লিখে দিন। অ্যাপ নিজেই চিনে তালিকায় তুলে দেবে। যেটা অ্যাপে নেই, সেটা শুধু আজকের জন্য যোগ হবে, বাজার শেষে মুছে যাবে।</p></div>
+  <textarea id="tdIn" rows="3" aria-label="আজকের জিনিসের তালিকা" placeholder="যেমন: দুই কেজি আলু, আধা কেজি পেঁয়াজ, ৫টা ডিম, সানসিল্ক শ্যাম্পু"></textarea>
+  <div id="tdPv" aria-live="polite"></div>
+  <button class="go" id="tdAdd" type="button" disabled>যোগ করুন</button>
+  <button class="rm" id="tdX" type="button">বন্ধ করুন</button>
+</div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -187,12 +212,12 @@ function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;
 var CATS=[["চাল-ডাল","মিনিকেট চাল|কেজি;নাজিরশাইল চাল|কেজি;মোটা চাল|কেজি;চিড়া|কেজি;মুড়ি|কেজি;খই|কেজি;আটা|কেজি;ময়দা|কেজি;সুজি|কেজি;বেসন|কেজি;মসুর ডাল|কেজি;মুগ ডাল|কেজি;ছোলার ডাল|কেজি;মাসকলাই ডাল|কেজি;অড়হর ডাল|কেজি;ছোলা|কেজি;মটর|কেজি;রাজমা|কেজি;বুট|কেজি;সেমাই|প্যাকেট;নুডলস|প্যাকেট;পাস্তা|প্যাকেট"],["তেল-রান্না","সয়াবিন তেল|লিটার;সরিষার তেল|লিটার;ঘি|প্যাকেট;ডালডা|প্যাকেট;মাখন|প্যাকেট;লবণ|কেজি;চিনি|কেজি;গুড়|কেজি;ভিনেগার|বোতল;সস|বোতল;টমেটো কেচাপ|বোতল;বেকিং সোডা|প্যাকেট;বেকিং পাউডার|প্যাকেট;ইস্ট|প্যাকেট"],["মসলা","হলুদ গুঁড়া|প্যাকেট;মরিচ গুঁড়া|প্যাকেট;ধনে গুঁড়া|প্যাকেট;জিরা গুঁড়া|প্যাকেট;জিরা|প্যাকেট;ধনে|প্যাকেট;মেথি|প্যাকেট;কালোজিরা|প্যাকেট;পাঁচফোড়ন|প্যাকেট;এলাচ|প্যাকেট;দারুচিনি|প্যাকেট;লবঙ্গ|প্যাকেট;তেজপাতা|প্যাকেট;গোলমরিচ|প্যাকেট;জয়ত্রী|প্যাকেট;জায়ফল|প্যাকেট;শুকনা মরিচ|প্যাকেট;রান্নার মশলা মিক্স|প্যাকেট;বিরিয়ানি মশলা|প্যাকেট;কাবাব মশলা|প্যাকেট;তেঁতুল|প্যাকেট;চাটনি মশলা|প্যাকেট;চাট মশলা|প্যাকেট"],["মূল সবজি","পেঁয়াজ|কেজি;রসুন|কেজি;আদা|কেজি;আলু|কেজি;মিষ্টি আলু|কেজি;কাঁচা মরিচ|কেজি;ধনেপাতা|আঁটি;পুদিনা পাতা|আঁটি;টমেটো|কেজি;বেগুন|কেজি;ঢেঁড়স|কেজি"],["সবজি","লাউ|পিস;কুমড়া|কেজি;চালকুমড়া|পিস;ঝিঙা|কেজি;চিচিঙ্গা|কেজি;ধুন্দুল|কেজি;করলা|কেজি;পটল|কেজি;ফুলকপি|পিস;বাঁধাকপি|পিস;ব্রোকলি|পিস;গাজর|কেজি;মূলা|কেজি;শালগম|কেজি;বিট|কেজি;শসা|কেজি;কাঁচা কলা|কেজি;কাঁচা পেঁপে|কেজি;মানকচু|কেজি;সিম|কেজি;বরবটি|কেজি;মটরশুঁটি|কেজি;কাঁচা বাদাম|কেজি;শিমের বিচি|কেজি;কচু|কেজি;কচুর লতি|কেজি;এঁচোড়|কেজি;ক্যাপসিকাম|কেজি;লেটুস|পিস"],["শাক","পালং শাক|আঁটি;লাল শাক|আঁটি;পুঁই শাক|আঁটি;কলমি শাক|আঁটি;লাউ শাক|আঁটি;সরিষা শাক|আঁটি;মুলা শাক|আঁটি;পাট শাক|আঁটি;থানকুনি|আঁটি"],["ফল","কলা|হালি;পেঁপে|কেজি;আপেল|কেজি;কমলা|কেজি;মালটা|কেজি;আম|কেজি;কাঁঠাল|পিস;লিচু|কেজি;জাম|কেজি;আঙুর|কেজি;আনার|কেজি;নাশপাতি|কেজি;কিউই|কেজি;পেয়ারা|কেজি;তরমুজ|পিস;বাঙ্গি|পিস;আনারস|পিস;লেবু|হালি;জাম্বুরা|পিস;বড়ই|কেজি;আমড়া|কেজি;খেজুর|প্যাকেট;কিশমিশ|প্যাকেট;কাজুবাদাম|প্যাকেট;কাঠবাদাম|প্যাকেট;পেস্তা|প্যাকেট;চিনাবাদাম|প্যাকেট"],["মাছ","রুই|কেজি;কাতলা|কেজি;মৃগেল|কেজি;ইলিশ|কেজি;পাঙাশ|কেজি;তেলাপিয়া|কেজি;শিং|কেজি;মাগুর|কেজি;কই|কেজি;চিংড়ি|কেজি;কাঁকড়া|কেজি;পুঁটি মাছ|কেজি;মলা মাছ|কেজি;ট্যাংরা মাছ|কেজি;বাইন মাছ|কেজি;শুঁটকি|প্যাকেট;টুনা|টিন"],["মাংস-ডিম-দুধ","ব্রয়লার মুরগি|কেজি;দেশি মুরগি|কেজি;সোনালী মুরগি|কেজি;গরুর মাংস|কেজি;খাসির মাংস|কেজি;কলিজা|কেজি;হাড়|কেজি;হাঁসের মাংস|কেজি;কবুতর|পিস;মুরগির ডিম|হালি;হাঁসের ডিম|হালি;তরল দুধ|লিটার;গুঁড়া দুধ|প্যাকেট;দই|কাপ;পনির|প্যাকেট;ক্রিম|প্যাকেট;চিজ|প্যাকেট"],["নাস্তা","পাউরুটি|প্যাকেট;বন|প্যাকেট;কেক|প্যাকেট;রাস্ক|প্যাকেট;বিস্কুট|প্যাকেট;কুকিজ|প্যাকেট;চানাচুর|প্যাকেট;চিপস|প্যাকেট;ঝুরি ভাজা|প্যাকেট;নিমকি|প্যাকেট;চকলেট|প্যাকেট;জ্যাম|বোতল;জেলি|বোতল;মধু|বোতল;পিনাট বাটার|কৌটা;কর্নফ্লেক্স|প্যাকেট;ওটস|প্যাকেট;মুসলি|প্যাকেট"],["পানীয়","চা পাতা|প্যাকেট;গ্রিন টি|প্যাকেট;কফি|প্যাকেট;হরলিক্স|কৌটা;বোর্নভিটা|কৌটা;ওভালটিন|কৌটা;জুস|বোতল;সফট ড্রিংক|বোতল;পানি|বোতল;ড্রিংক পাউডার|প্যাকেট;রুহ আফজা|বোতল"],["ঘর পরিষ্কার","ডিটারজেন্ট পাউডার|প্যাকেট;সার্ফ|প্যাকেট;কাপড় কাচার সাবান|পিস;থালা ধোয়ার লিকুইড|বোতল;ডিশ বার|পিস;স্ক্রাবার|পিস;ফ্লোর ক্লিনার|বোতল;ফিনাইল|বোতল;ব্লিচিং পাউডার|প্যাকেট;টয়লেট ক্লিনার|বোতল;গ্লাস ক্লিনার|বোতল;হারপিক|বোতল;মশার কয়েল|প্যাকেট;মশা মারার স্প্রে|বোতল;ন্যাপথলিন|প্যাকেট;তেলাপোকা স্প্রে|বোতল;ঝাড়ু|পিস;মগ|পিস;বালতি|পিস;ন্যাকড়া|পিস"],["ব্যক্তিগত যত্ন","গোসলের সাবান|পিস;হ্যান্ডওয়াশ|বোতল;শ্যাম্পু|বোতল;কন্ডিশনার|বোতল;টুথপেস্ট|পিস;টুথব্রাশ|পিস;মাউথওয়াশ|পিস;নারকেল তেল|বোতল;চুলের সরিষার তেল|বোতল;লোশন|বোতল;ভ্যাসলিন|বোতল;ফেসওয়াশ|পিস;ফেস ক্রিম|পিস;সানস্ক্রিন|পিস;ডিওডোরেন্ট|পিস;পারফিউম|পিস;রেজর|পিস;শেভিং ক্রিম|পিস;ট্যালকম পাউডার|পিস;স্যানিটারি প্যাড|প্যাকেট;টিস্যু|প্যাকেট;ওয়েট টিস্যু|প্যাকেট"],["শিশুর জিনিস","বেবি ফর্মুলা|কৌটা;সেরেলাক|কৌটা;ডায়াপার|প্যাকেট;বেবি ওয়াইপস|প্যাকেট;বেবি লোশন|বোতল;বেবি অয়েল|বোতল;বেবি শ্যাম্পু|বোতল;বেবি পাউডার|বোতল;ফিডার|পিস;নিপল|পিস"],["টুকিটাকি","দিয়াশলাই|পিস;লাইটার|পিস;গ্যাস সিলিন্ডার|পিস;মোমবাতি|পিস;ব্যাটারি|পিস;বাল্ব|পিস;অ্যালুমিনিয়াম ফয়েল|রোল;প্লাস্টিক র‍্যাপ|রোল;ঝিল্লি ব্যাগ|প্যাকেট;টিস্যু পেপার|রোল;ময়লার ব্যাগ|প্যাকেট;পলিথিন|প্যাকেট;মরিচের গুঁড়া ছাঁকনি|পিস;চা ছাঁকনি|পিস;পানির ফিল্টার|পিস;সুতা|প্যাকেট;সুই|প্যাকেট;সেফটি পিন|প্যাকেট"],["ওষুধ","প্যারাসিটামল|প্যাকেট;গ্যাসের ওষুধ|প্যাকেট;স্যালাইন|প্যাকেট;ব্যান্ডেজ|পিস;তুলা|পিস;ডেটল|পিস;বার্নল|পিস;থার্মোমিটার|পিস;মাস্ক|পিস;হ্যান্ড স্যানিটাইজার|পিস"],["মৌসুমী","শরবত পাউডার|প্যাকেট;পেঁয়াজু-বেগুনির উপকরণ|প্যাকেট;লাচ্ছা|প্যাকেট;পোলাওয়ের চাল|কেজি;সুগন্ধি|পিস;জর্দা|প্যাকেট;খেজুরের রস|লিটার;পিঠার চালের গুঁড়া|কেজি;নারকেল|পিস;ছাতা|পিস;বর্ষাতি|পিস"]];
 var BASE=[];CATS.forEach(function(c,ci){c[1].split(";").forEach(function(x){var p=x.split("|");BASE.push(["i"+BASE.length,p[0],p[1],ci])})});
 var UNITS=["কেজি","গ্রাম","লিটার","পিস","হালি","ডজন","প্যাকেট","আঁটি","বোতল","কৌটা","কাপ","রোল","টিন"],TINT=["#fde7b0","#f8c9a8","#fbe38a","#e8c4d8","#e3d3b5","#f6b8b0","#cdbbe6","#f2d9a0","#bfe3cf"];
-var S={q:{},u:{},custom:[],shop:[],cat:"সব",tab:1,freq:{},last:[],price:{}},sh=null,imp=false;
+var S={q:{},u:{},custom:[],shop:[],cat:"সব",tab:1,freq:{},last:[],price:{},tmp:[],tn:0},sh=null,imp=false;
 try{var r=localStorage.getItem("bazar2");if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
 function save(){try{localStorage.setItem("bazar2",JSON.stringify(S))}catch(e){}}
 function toast(t){var e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){e.hidden=true},2400)}
-function all(){return BASE.map(function(b){return{id:b[0],n:b[1],u:b[2],c:b[3],g:b[3]}}).concat(S.custom.map(function(n,i){return{id:"c"+i,n:n,u:"পিস",c:i+3,g:-1}}))}
-function cats(){return["সব"].concat(CATS.map(function(c){return c[0]}),S.custom.length?["নিজের"]:[])}
+function all(){return(S.tmp||[]).map(function(x){return{id:"t"+x.k,n:x.n,u:"পিস",c:x.k+5,g:-1,tmp:1}}).concat(BASE.map(function(b){return{id:b[0],n:b[1],u:b[2],c:b[3],g:b[3]}})).concat(S.custom.map(function(n,i){return{id:"c"+i,n:n,u:"পিস",c:i+3,g:-1}}))}
+function cats(){return["সব"].concat(CATS.map(function(c){return c[0]}),S.custom.length?["নিজের"]:[],(S.tmp&&S.tmp.length)?["আজকের"]:[])}
 if(cats().indexOf(S.cat)<0)S.cat="সব";
 function find(id){return all().filter(function(x){return x.id===id})[0]}
 function U(it){return S.u[it.id]||it.u}
@@ -220,7 +245,7 @@ var IM={},IS={
 Object.keys(IS).forEach(function(k){k.split(",").forEach(function(n){IM[n]=IS[k]})});
 function ico(it){var s=IM[it.n];return s?'<svg viewBox="0 0 48 48" aria-hidden="true">'+s+'</svg>':emo(it)}
 function ltr(n){var m=n.match(/^[\u0980-\u09FF][\u09BE-\u09CD\u0981-\u0983]?/);return m?m[0]:n.charAt(0)}
-function inCat(it){if(S.cat==="সব")return true;if(it.g<0)return S.cat==="নিজের";return CATS[it.g][0]===S.cat}
+function inCat(it){if(S.cat==="সব")return true;if(it.g<0)return S.cat===(it.tmp?"আজকের":"নিজের");return CATS[it.g][0]===S.cat}
 function picked(){return all().filter(function(x){return S.q[x.id]})}
 function tile(it){var q=S.q[it.id]||0;
     return'<button class="t'+(q?" on":"")+'" data-id="'+it.id+'" style="--c:'+TINT[it.c%TINT.length]+'" aria-label="'+esc(it.n)+(q?" "+qtxt(q)+" "+U(it):"")+'"><i>'+ico(it)+'</i>'+esc(it.n)+'<small>'+U(it)+'</small>'+(q?'<span class="b">'+qtxt(q)+'</span><span class="m" role="button" aria-label="কমান" data-minus="'+it.id+'">−</span>':"")+'</button>'}
@@ -243,7 +268,7 @@ function gridClick(e){var mi=e.target.closest("[data-minus]");
   var t=e.target.closest("[data-id]");if(!t)return;var it2=find(t.dataset.id);
   if(S.q[it2.id])openSh(it2.id);else{S.q[it2.id]=step(it2)<1?1:step(it2);draw()}}
 $("grid").onclick=gridClick;$("reg").onclick=gridClick;
-$("lastb").onclick=function(e){if(!e.target.closest("[data-last]"))return;var n=0;S.last.forEach(function(x){var it=(x.id&&find(x.id))||all().filter(function(a){return a.n===x.n})[0];if(!it){S.custom.push(x.n);it=find("c"+(S.custom.length-1))}if(!S.q[it.id]){S.q[it.id]=x.q;S.u[it.id]=x.u;n++}});toast(n?"গতবারের "+bn(n)+"টি জিনিস যোগ হয়েছে":"সবই আগে থেকে তালিকায় আছে");draw()};
+$("lastb").onclick=function(e){if(!e.target.closest("[data-last]"))return;var n=0;S.last.forEach(function(x){var it=(x.id&&find(x.id))||all().filter(function(a){return a.n===x.n})[0];if(!it){if(x.t){S.tn=(S.tn||0)+1;S.tmp.push({k:S.tn,n:x.n});it=find("t"+S.tn)}else{S.custom.push(x.n);it=find("c"+(S.custom.length-1))}}if(!S.q[it.id]){S.q[it.id]=x.q;S.u[it.id]=x.u;n++}});toast(n?"গতবারের "+bn(n)+"টি জিনিস যোগ হয়েছে":"সবই আগে থেকে তালিকায় আছে");draw()};
 /* quantity sheet */
 function openSh(id){sh=id;drawSh();$("dim").hidden=false}
 function drawSh(){var it=find(sh);$("sh").style.setProperty("--c",TINT[it.c%TINT.length]);
@@ -251,7 +276,7 @@ function drawSh(){var it=find(sh);$("sh").style.setProperty("--c",TINT[it.c%TINT
 function closeSh(){$("dim").hidden=true;sh=null;draw();if(!$("pvd").hidden)drawPv()}
 $("sh").onclick=function(e){var b=e.target.closest("button");if(!b)return;var it=find(sh),a=b.dataset.a;
   if(a==="inc")S.q[sh]+=step(it);else if(a==="dec"){if(S.q[sh]-step(it)>0)S.q[sh]-=step(it)}
-  else if(a==="ok")return closeSh();else if(a==="rm"){delete S.q[sh];return closeSh()}
+  else if(a==="ok")return closeSh();else if(a==="rm"){delete S.q[sh];if(it.tmp){S.tmp=S.tmp.filter(function(x){return"t"+x.k!==sh});if(!S.tmp.length&&S.cat==="আজকের")S.cat="সব"}return closeSh()}
   else if(b.dataset.p)S.q[sh]=+b.dataset.p;else if(b.dataset.u)S.u[sh]=b.dataset.u;
   drawSh()};
 $("dim").onclick=function(e){if(e.target===this)closeSh()};
@@ -381,7 +406,7 @@ $("pv").onclick=function(e){var b=e.target.closest("button");if(!b)return;var d=
 $("pvd").onclick=function(e){if(e.target===this)closePv()};
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!sh&&!$("pvd").hidden)closePv()});
 $("share").onclick=openPv;
-$("clr").onclick=function(){if(!picked().length)return;if(confirm("পুরো তালিকা মুছবেন?")){S.q={};S.u={};draw()}};
+$("clr").onclick=function(){if(!picked().length)return;if(confirm("পুরো তালিকা মুছবেন?")){S.q={};S.u={};S.tmp=[];if(S.cat==="আজকের")S.cat="সব";draw()}};
 function parse(t){var o=[];t.split(/\n/).forEach(function(l){var m=l.match(/^[\s•☐☑✅\-*]*(.+?)\s*[—–-]\s*([০-৯\d.½]+)\s*(.*)$/);if(m){var qs=m[2],q=/½/.test(qs)?(num(qs.replace("½",""))||0)+.5:num(qs);o.push({n:m[1].trim(),q:q||1,u:m[3].trim()||"পিস",done:false,p:""})}});return o}
 $("load").onclick=function(){var l=parse($("paste").value);if(!l.length)return toast("তালিকা বোঝা যায়নি");S.shop=l;imp=false;$("paste").value="";drawShop()};
 $("mine").onclick=function(){startShop()};
@@ -400,7 +425,7 @@ function drawShop(){var n=S.shop.length,h="";
   $("shop").innerHTML=h;$("imp").hidden=!!n&&!imp;updTot();save()}
 $("shop").onclick=function(e){var k=e.target.closest("[data-k]");if(k){var x=S.shop[+k.dataset.k];x.done=!x.done;drawShop();return}if(e.target.id==="oth"){imp=true;drawShop();$("paste").focus()}};
 $("shop").oninput=function(e){if(e.target.dataset.p!==undefined){S.shop[+e.target.dataset.p].p=e.target.value;updTot();save()}};
-$("tot").onclick=function(e){if(e.target.id==="fin"){var t=total();var dn=S.shop.filter(function(x){return x.done}),src=dn.length?dn:S.shop;src.forEach(function(x){var it=(x.id&&find(x.id))||all().filter(function(a){return a.n===x.n})[0];if(it)S.freq[it.id]=(S.freq[it.id]||0)+1});S.last=S.shop.map(function(x){return{id:x.id,n:x.n,q:x.q,u:x.u}});S.shop.forEach(function(x){var v=num(x.p);if(v>0&&x.q>0)S.price[x.n]={u:x.u,pp:Math.round(v/x.q*100)/100}});S.shop=[];S.q={};S.u={};toast("বাজার শেষ! মোট খরচ ৳ "+bn(Math.round(t*100)/100));tab(1)}};
+$("tot").onclick=function(e){if(e.target.id==="fin"){var t=total();var dn=S.shop.filter(function(x){return x.done}),src=dn.length?dn:S.shop;src.forEach(function(x){var it=(x.id&&find(x.id))||all().filter(function(a){return a.n===x.n})[0];if(it&&!it.tmp)S.freq[it.id]=(S.freq[it.id]||0)+1});S.last=S.shop.map(function(x){return{id:x.id,n:x.n,q:x.q,u:x.u,t:/^t\d+$/.test(x.id||"")?1:0}});S.shop.forEach(function(x){var v=num(x.p);if(v>0&&x.q>0)S.price[x.n]={u:x.u,pp:Math.round(v/x.q*100)/100}});S.shop=[];S.q={};S.u={};S.tmp=[];if(S.cat==="আজকের")S.cat="সব";toast("বাজার শেষ! মোট খরচ ৳ "+bn(Math.round(t*100)/100));tab(1)}};
 /* tabs */
 function tab(n){S.tab=n;$("t1").setAttribute("aria-pressed",n===1);$("t2").setAttribute("aria-pressed",n===2);$("v1").hidden=n!==1;$("v2").hidden=n!==2;$("bar1").hidden=n!==1;$("tot").hidden=n!==2||!S.shop.length;document.body.classList.toggle("shop",n===2);$("h1").textContent=n===1?"বাজারের তালিকা":"বাজারে আছি";if(n===2)drawShop();else draw();window.scrollTo(0,0)}
 $("t1").onclick=function(){tab(1)};$("t2").onclick=function(){tab(2)};
@@ -415,21 +440,22 @@ if(S.hidden){Object.keys(S.hidden).forEach(function(id){if(S.hidden[id]&&/^i\d+$
 
 var _origAll=all;
 all=function(){return _origAll().filter(function(it){return !S.hid[it.n]})};
+function mgAll(){return _origAll().filter(function(it){return !it.tmp})}
 
 var mg={cat:"সব",undo:null},OFF="__off";
-function mgItems(){return _origAll().filter(function(it){
+function mgItems(){return mgAll().filter(function(it){
   if(mg.cat===OFF)return !!S.hid[it.n];
   if(mg.cat==="সব")return true;
   if(it.g<0)return mg.cat==="নিজের";
   return CATS[it.g][0]===mg.cat})}
 function mgCard(it){var tint=TINT[it.c%TINT.length],off=!!S.hid[it.n];
   return'<button type="button" class="sett-item'+(off?" off":"")+'" data-n="'+esc(it.n)+'" style="--c:'+tint+'" aria-pressed="'+off+'" aria-label="'+esc(it.n)+(off?" — বাদ দেওয়া":"")+'"><span class="x">✕</span><i style="background:'+tint+'">'+ico(it)+'</i><span class="nm">'+esc(it.n)+'</span></button>'}
-function mgCounts(){var a=_origAll(),off=a.filter(function(it){return S.hid[it.n]}).length;
+function mgCounts(){var a=mgAll(),off=a.filter(function(it){return S.hid[it.n]}).length;
   $("mgCount").textContent=bn(a.length-off)+"টি চালু · "+bn(off)+"টি বাদ";
   $("mgUndo").disabled=!mg.undo;
   var c=$("mgChips").querySelector("[data-mc='"+OFF+"']");if(c)c.textContent="বাদ দেওয়া · "+bn(off)}
 function mgDraw(){
-  var offN=_origAll().filter(function(it){return S.hid[it.n]}).length;
+  var offN=mgAll().filter(function(it){return S.hid[it.n]}).length;
   var tabs=["সব"].concat(CATS.map(function(c){return c[0]}),S.custom.length?["নিজের"]:[]);
   $("mgChips").innerHTML=tabs.map(function(k){return'<button class="c" data-mc="'+esc(k)+'" aria-pressed="'+(mg.cat===k)+'">'+esc(k)+'</button>'}).join("")+'<button class="c off" data-mc="'+OFF+'" aria-pressed="'+(mg.cat===OFF)+'">বাদ দেওয়া · '+bn(offN)+'</button>';
   var list=mgItems();
@@ -472,6 +498,147 @@ $("settbtn").onclick=openSett;
 $("settClose").onclick=closeSett;
 $("settPanel").onclick=function(e){if(e.target===this)closeSett()};
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("settPanel").hidden&&!sh)closeSett()});
+
+/* ===== ORDER ENGINE: turns written (later: spoken) Bengali into list items =====
+   parseOrder(text, items) is a pure function: text in, rows out. The same engine will take the voice transcript. */
+function pn(s){return String(s).normalize("NFD").replace(/[\u09BC\u0981\u200C\u200D]/g,"").replace(/[\u09C0]/g,"\u09BF").replace(/[\u09C2]/g,"\u09C1").replace(/[\u09B6\u09B7]/g,"\u09B8").replace(/\u09A3/g,"\u09A8").replace(/[.,;:!?"'“”‘’()\[\]{}\-–—_]/g,"").toLowerCase()}
+function lev(a,b){var m=a.length,n=b.length,p=[],i,j;if(Math.abs(m-n)>2)return 9;for(j=0;j<=n;j++)p[j]=j;
+  for(i=1;i<=m;i++){var c=[i];for(j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));p=c}return p[n]}
+var SUF=["গুলো","গুলি","ের","র","কে"];
+function tokEq(a,b){if(a===b)return true;
+  var la=a.length,lb=b.length;
+  if(la>=4&&lb>=4&&lev(a,b)<=(la>=8&&lb>=8?2:1))return true;
+  for(var i=0;i<SUF.length;i++){var s=SUF[i];
+    if(la>lb&&a.slice(-s.length)===s&&a.length-s.length>=3&&tokEq(a.slice(0,-s.length),b))return true;
+    if(lb>la&&b.slice(-s.length)===s&&b.length-s.length>=3&&tokEq(b.slice(0,-s.length),a))return true}
+  return false}
+var NUMW={};
+(function(){var w={"শূন্য":0,"এক":1,"দুই":2,"দু":2,"তিন":3,"চার":4,"পাঁচ":5,"ছয়":6,"ছয়":6,"সাত":7,"আট":8,"নয়":9,"নয়":9,"দশ":10,"এগারো":11,"বারো":12,"তেরো":13,"চৌদ্দ":14,"পনেরো":15,"ষোলো":16,"ষোল":16,"সতেরো":17,"আঠারো":18,"উনিশ":19,"ঊনিশ":19,"বিশ":20,"পঁচিশ":25,"ত্রিশ":30,"চল্লিশ":40,"পঞ্চাশ":50,"ষাট":60,"একশো":100,"একশ":100};
+  Object.keys(w).forEach(function(k){var key=pn(k);NUMW[key]=w[k];["টা","টি","টো","খানা"].forEach(function(s){NUMW[key+pn(s)]=[w[k],"পিস"]})});
+  NUMW[pn("একটা")]=[1,"পিস"];NUMW[pn("দুটো")]=[2,"পিস"];NUMW[pn("দুটি")]=[2,"পিস"]})();
+var MODS={};MODS[pn("দেড়")]=1.5;MODS[pn("আড়াই")]=2.5;MODS[pn("আধা")]=.5;MODS[pn("আধ")]=.5;MODS[pn("অর্ধেক")]=.5;
+var UW={};
+(function(){var u={"কেজি":"কেজি","কেজিতে":"কেজি","কিলো":"কেজি","কিলোগ্রাম":"কেজি","kg":"কেজি","গ্রাম":"গ্রাম","গ্রা":"গ্রাম","gm":"গ্রাম","g":"গ্রাম","লিটার":"লিটার","লিটর":"লিটার","ltr":"লিটার","l":"লিটার","পিস":"পিস","পিচ":"পিস","pcs":"পিস","টা":"পিস","টি":"পিস","টো":"পিস","খানা":"পিস","হালি":"হালি","ডজন":"ডজন","প্যাকেট":"প্যাকেট","পেকেট":"প্যাকেট","প্যাক":"প্যাকেট","আঁটি":"আঁটি","আটি":"আঁটি","বোতল":"বোতল","কৌটা":"কৌটা","কৌটো":"কৌটা","কাপ":"কাপ","রোল":"রোল","টিন":"টিন","পোয়া":"পোয়া"};
+  Object.keys(u).forEach(function(k){UW[pn(k)]=u[k]})})();
+var STRONG={"হালি":1,"ডজন":1,"কেজি":1,"লিটার":1,"প্যাকেট":1,"পোয়া":1,"বোতল":1,"কৌটা":1};
+var FILL={};["দিন","দেন","দাও","দিও","লাগবে","লাগবো","লাগে","চাই","কিনব","কিনবো","কিনতে","নেব","নিব","আনব","আনবেন","একটু","কিছু","আরও","আরো","প্লিজ","দয়া","করে","টাকার"].forEach(function(w){FILL[pn(w)]=1});
+var PREF={};[["ডিম","মুরগির ডিম"],["তেল","সয়াবিন তেল"],["মরিচ","কাঁচা মরিচ"],["দুধ","তরল দুধ"],["চা","চা পাতা"]].forEach(function(p){PREF[pn(p[0])]=p[1]});
+function numVal(tok){ /* "২", "1.5", "১/২", "½" -> number, or null */
+  if(tok==="½")return .5;
+  var m=tok.match(/^([০-৯0-9]+)\/([০-৯0-9]+)$/);if(m){var d=num(m[2]);return d?num(m[1])/d:null}
+  return/^[০-৯0-9]+([.,][০-৯0-9]+)?$/.test(tok)?num(tok):null}
+function qtyAt(tk,i){ /* read a quantity starting at token i -> {q,u,len} or null */
+  var t=tk[i],p=pn(t),m;
+  function nextNum(j){if(j>=tk.length)return null;var n=numVal(tk[j]);if(n!=null)return{v:n,len:1};var w=NUMW[pn(tk[j])];if(typeof w==="number")return{v:w,len:1};return null}
+  if(p===pn("সাড়ে")){var n=nextNum(i+1);return n?{q:n.v+.5,len:1+n.len}:null}
+  if(p===pn("সোয়া")){var n2=nextNum(i+1);return n2?{q:n2.v+.25,len:1+n2.len}:{q:1.25,len:1}}
+  if(p===pn("পৌনে")){var n3=nextNum(i+1);return n3?{q:n3.v-.25,len:1+n3.len}:{q:.75,len:1}}
+  if(MODS[p]!=null)return{q:MODS[p],len:1};
+  var v=numVal(t);if(v!=null)return{q:v,len:1};
+  m=t.match(/^([০-৯0-9]+(?:[.,][০-৯0-9]+)?)(\D+)$/);   /* "৫টা", "২কেজি" */
+  if(m&&UW[pn(m[2])])return{q:num(m[1]),u:UW[pn(m[2])],len:1};
+  var w=NUMW[p];if(typeof w==="number")return{q:w,len:1};if(w)return{q:w[0],u:w[1],len:1};
+  return null}
+function parseSeg(seg){
+  var tk=seg.trim().split(/\s+/).filter(Boolean),out=[],cur=null,i=0;
+  function push(){if(cur&&(cur.name.length))out.push(cur);cur=null}
+  while(i<tk.length){
+    var qa=qtyAt(tk,i);
+    if(qa){
+      if(cur&&cur.q!=null)push();
+      if(!cur)cur={q:null,u:null,name:[],nf:false};
+      if(cur.q==null&&cur.name.length)cur.nf=true;
+      cur.q=qa.q;if(qa.u)cur.u=qa.u;i+=qa.len;
+      if(i<tk.length&&!cur.u&&UW[pn(tk[i])]){cur.u=UW[pn(tk[i])];i++}
+      continue}
+    var p=pn(tk[i]);
+    if(FILL[p]){i++;continue}
+    if(UW[p]&&cur&&!cur.u&&(cur.q!=null||STRONG[UW[p]])&&cur.name.length+(cur.q!=null?1:0)>0){cur.u=UW[p];i++;continue}
+    if(cur&&cur.q!=null&&cur.nf)push();
+    if(!cur)cur={q:null,u:null,name:[],nf:false};
+    cur.name.push(tk[i]);i++}
+  push();
+  out.forEach(function(g){if(g.u==="পোয়া"){g.q=(g.q==null?1:g.q)*.25;g.u="কেজি"}});
+  return out}
+function matchName(nameToks,idx){
+  var sp=nameToks.map(pn),res=[];
+  idx.forEach(function(o){
+    var used=[],hit=0;
+    sp.forEach(function(s){for(var k=0;k<o.tk.length;k++)if(!used[k]&&tokEq(s,o.tk[k])){used[k]=1;hit++;break}});
+    var itHit=used.filter(Boolean).length,spCov=hit/sp.length,itCov=itHit/o.tk.length;
+    if(spCov===1)res.push({it:o.it,rank:2+itCov});
+    else if(itCov===1)res.push({it:o.it,rank:1+hit/sp.length*.5})});
+  if(!res.length)return{status:"new",cands:[]};
+  var best=Math.max.apply(null,res.map(function(r){return r.rank})),top=res.filter(function(r){return Math.abs(r.rank-best)<1e-9}).map(function(r){return r.it});
+  if(top.length===1)return{status:"ok",it:top[0],cands:top};
+  var pf=PREF[pn(nameToks.join(" "))];
+  if(pf){var h=top.filter(function(x){return x.n===pf})[0];if(h)return{status:"ok",it:h,cands:top,auto:1}}
+  var f=top.map(function(x){return(S.freq&&S.freq[x.id])||0}),mx=Math.max.apply(null,f),srt=f.slice().sort(function(a,b){return b-a});
+  if(mx>0&&mx>(srt[1]||0))return{status:"ok",it:top[f.indexOf(mx)],cands:top,auto:1};
+  return{status:"amb",cands:top.slice(0,8)}}
+function parseOrder(text,items){
+  var idx=items.map(function(it){return{it:it,tk:it.n.split(/\s+/).map(pn)}}),rows=[];
+  String(text).split(/[,،;\n।]+|\s+(?:আর|এবং|ও|তারপর)\s+/).forEach(function(seg){
+    if(!seg||!seg.trim())return;
+    parseSeg(seg).forEach(function(g){
+      var name=g.name.join(" "),m=matchName(g.name,idx);
+      rows.push({spoken:name,key:pn(name),q:g.q,u:g.u,status:m.status,it:m.it||null,cands:m.cands,auto:!!m.auto})})});
+  return rows}
+
+/* ===== "today only" box ===== */
+var td={sel:{},perm:{},skip:{},rows:[]};
+function tdQty(r,it){ /* final quantity/unit a row will get */
+  var u=r.u||(it?it.u:"পিস"),q=r.q;
+  if(q==null)q=(u==="কেজি"||u==="লিটার")?1:(u==="গ্রাম"?100:1);
+  return{q:q,u:u}}
+function tdResolve(r){ /* apply the person's choice on an ambiguous row */
+  if(r.status==="amb"&&td.sel[r.key]){var c=r.cands.filter(function(x){return x.id===td.sel[r.key]})[0];if(c){r.status="ok";r.it=c}}
+  return r}
+function tdRender(){
+  var rows=parseOrder($("tdIn").value,_origAll()).map(tdResolve).filter(function(r){return!td.skip[r.key]});
+  td.rows=rows;
+  var html=rows.map(function(r){
+    var k=esc(r.key);
+    if(r.status==="ok"){var it=r.it,qu=tdQty(r,it),note=[];
+      if(pn(it.n)!==r.key)note.push("শুনেছি: "+r.spoken);
+      if(S.hid[it.n])note.push("আগে বাদ দেওয়া ছিল, ফিরে আসবে");
+      else if(S.q[it.id])note.push("তালিকায় আগেই ছিল, পরিমাণ বদলাবে");
+      return'<div class="td-r" style="--c:'+TINT[it.c%TINT.length]+'"><i>'+ico(it)+'</i><div class="n"><b>'+esc(it.n)+'</b><small>'+qtxt(qu.q)+' '+esc(qu.u)+(note.length?' · '+esc(note.join(" · ")):'')+'</small></div><button class="td-x" data-rm="'+k+'" aria-label="বাদ দিন">✕</button></div>'}
+    if(r.status==="amb"){
+      return'<div class="td-r amb"><div class="n"><b>“'+esc(r.spoken)+'” কোনটা?</b><div class="td-ch">'+r.cands.map(function(c){return'<button class="c" data-pick="'+k+'" data-id="'+c.id+'">'+esc(c.n)+'</button>'}).join("")+'</div></div><button class="td-x" data-rm="'+k+'" aria-label="বাদ দিন">✕</button></div>'}
+    var qu=tdQty(r,null);
+    return'<div class="td-r new"><i>🛍️</i><div class="n"><b>'+esc(r.spoken)+'</b><small>'+qtxt(qu.q)+' '+esc(qu.u)+' · নতুন, শুধু আজকের জন্য</small></div><button class="td-keep" data-perm="'+k+'" aria-pressed="'+!!td.perm[r.key]+'">সবসময় রাখুন</button><button class="td-x" data-rm="'+k+'" aria-label="বাদ দিন">✕</button></div>'}).join("");
+  $("tdPv").innerHTML=html||'<p class="td-note">লিখলে এখানে দেখা যাবে অ্যাপ কী বুঝেছে।</p>';
+  var amb=rows.filter(function(r){return r.status==="amb"}).length,ready=rows.length-amb,b=$("tdAdd");
+  b.disabled=!rows.length||amb>0;
+  b.textContent=amb?"আগে কোনটা চান বেছে নিন":(rows.length?"তালিকায় যোগ করুন · "+bn(ready)+"টি":"যোগ করুন")}
+function tdOpen(){td={sel:{},perm:{},skip:{},rows:[]};$("tdIn").value="";tdRender();$("tdD").hidden=false;document.body.style.overflow="hidden";setTimeout(function(){$("tdIn").focus()},60)}
+function tdClose(){$("tdD").hidden=true;document.body.style.overflow=""}
+function tdCommit(){
+  var added=0;
+  td.rows.forEach(function(r){
+    var it=r.it,qu;
+    if(r.status==="ok"){if(S.hid[it.n])delete S.hid[it.n]}
+    else if(r.status==="new"){
+      var ex=_origAll().filter(function(a){return pn(a.n)===r.key})[0];
+      if(ex)it=ex;
+      else if(td.perm[r.key]){S.custom.push(r.spoken);it=find("c"+(S.custom.length-1))}
+      else{S.tn=(S.tn||0)+1;S.tmp.push({k:S.tn,n:r.spoken});it=find("t"+S.tn)}}
+    else return;
+    qu=tdQty(r,it);S.q[it.id]=qu.q;if(r.u)S.u[it.id]=qu.u;added++});
+  tdClose();draw();toast(bn(added)+"টি জিনিস তালিকায় যোগ হয়েছে")}
+$("tdOpen").onclick=tdOpen;
+$("tdIn").oninput=tdRender;
+$("tdX").onclick=tdClose;
+$("tdAdd").onclick=tdCommit;
+$("tdD").onclick=function(e){if(e.target===this)tdClose()};
+$("tdPv").onclick=function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.rm){td.skip[b.dataset.rm]=1}
+  else if(b.dataset.pick){td.sel[b.dataset.pick]=b.dataset.id}
+  else if(b.dataset.perm){td.perm[b.dataset.perm]=!td.perm[b.dataset.perm]}
+  tdRender()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("tdD").hidden)tdClose()});
 
 try{$("dt").textContent=new Date().toLocaleDateString("bn-BD",{weekday:"long",day:"numeric",month:"long"})}catch(e){}
 tab(S.tab||1);

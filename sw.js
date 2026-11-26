@@ -1,6 +1,6 @@
 /* বাজারের তালিকা — offline cache + update handling.
-   To release an update: upload the new files, and change the number below (bazar-v8 -> bazar-v9). */
-var VERSION = "bazar-v8";
+   To release an update: upload the new files, and change the number below (bazar-v9 -> bazar-v10). */
+var VERSION = "bazar-v9";
 var CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png", "icon-monochrome.png"];
 
 self.addEventListener("install", function (e) {
