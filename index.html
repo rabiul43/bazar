@@ -305,9 +305,20 @@ function listLink(){
   return location.origin+location.pathname+"#l="+catSig()+"_"+parts.join("_")}
 function doShare(){
   var link=listLink(),t="🛒 বাজারের তালিকা · "+bn(picked().length)+"টি\n"+lines().join("\n")+(link?"\n\n👉 অ্যাপে খুলুন:\n"+link:"");
+  function copyIt(){try{navigator.clipboard.writeText(t).then(function(){toast("তালিকা কপি হয়েছে, WhatsApp-এ পেস্ট করুন")})}catch(e){toast("পাঠানো যায়নি")}}
+  function sheet(){try{if(navigator.share){navigator.share({title:"বাজারের তালিকা",text:t}).catch(function(){});return}}catch(e){}copyIt()}
+  if(!navigator.onLine){
+    /* no internet: wa.me needs the web, so hand the text straight to the phone's WhatsApp / share menu */
+    toast("নেট নেই — WhatsApp নেট পেলে পাঠিয়ে দেবে");
+    if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+      var left=false,ov=function(){if(document.hidden)left=true};
+      document.addEventListener("visibilitychange",ov);
+      location.href="whatsapp://send?text="+encodeURIComponent(t);
+      setTimeout(function(){document.removeEventListener("visibilitychange",ov);if(!left)sheet()},1600);
+      return}
+    return sheet()}
   try{var w=window.open("https://wa.me/?text="+encodeURIComponent(t),"_blank");if(w)return}catch(e){}
-  try{if(navigator.share){navigator.share({title:"বাজারের তালিকা",text:t}).catch(function(){});return}}catch(e){}
-  try{navigator.clipboard.writeText(t).then(function(){toast("তালিকা কপি হয়েছে, WhatsApp-এ পেস্ট করুন")})}catch(e){toast("পাঠানো যায়নি")}}
+  sheet()}
 /* open a list that arrived as a link */
 function loadFromHash(){
   var m=location.hash.match(/^#l=(.+)$/);if(!m)return;
